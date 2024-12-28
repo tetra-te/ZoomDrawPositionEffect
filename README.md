@@ -4,7 +4,7 @@
 中心位置を決めて描画位置を拡大縮小できます。ついでに回転の同期のような機能も追加しています。
 
 ## 導入方法
-[Releases](https://github.com/tetra-te/ZoomDrawPositionEffect/releases/latest)から**ZoomDrawPositionEffect.ymme**をダウンロードします。  
+[Releases](https://github.com/tetra-te/ZoomDrawPositionEffect/releases/latest)から`ZoomDrawPositionEffect.ymme`をダウンロードします。  
 ダウンロードしたファイルを開いて、表示される画面に従ってインストールしてください。  
 
 ## 使用方法
