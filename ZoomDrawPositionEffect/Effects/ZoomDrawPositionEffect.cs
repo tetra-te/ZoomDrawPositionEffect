@@ -28,8 +28,8 @@ namespace ZoomDrawPositionEffect.Effects
         [AnimationSlider("F1", "px", -500, 500)]
         public Animation CenterY { get; } = new Animation(0, -999999, 999999);
         [Display(GroupName = "拡大縮小（描画位置）", Name = "回転率", Description = "回転率")]
-        [AnimationSlider("F1", "%", 0, 100)]
-        public Animation RotationRatio { get; } = new Animation(0, 0, 100);
+        [AnimationSlider("F1", "%", -100, 100)]
+        public Animation RotationRatio { get; } = new Animation(0, -999999, 999999);
         [Display(GroupName = "拡大縮小（描画位置）", Name = "回転方向", Description = "回転の方向")]
         [EnumComboBox]
         public DirectionEnum Direction { get => direction; set => Set(ref direction, value); }
