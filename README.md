@@ -1,0 +1,2 @@
+# ZoomDrawPositionEffect
+ 描画位置を拡大縮小する映像エフェクトプラグイン
