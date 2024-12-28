@@ -4,7 +4,7 @@
 中心位置を決めて描画位置を拡大縮小できます。ついでに回転の同期のような機能も追加しています。
 
 ## 導入方法
-[Releases](https://github.com/tetra-te/ZoomDrawPositionEffect/releases/latest)から**ZoomDrawPositionEffect_vXX.ymme**をダウンロードします。(XXはバージョン名)  
+[Releases](https://github.com/tetra-te/ZoomDrawPositionEffect/releases/latest)から**ZoomDrawPositionEffect.ymme**をダウンロードします。  
 ダウンロードしたファイルを開いて、表示される画面に従ってインストールしてください。  
 
 ## 使用方法
@@ -12,4 +12,4 @@
 **テキストを1文字ごとに動かす場合は、テキストアイテムの文字ごとに分割を有効にする必要があります。**
 ## アンインストール方法
 YMM4を起動して、`ヘルプ(H)`>`その他`>`プラグインフォルダを開く`をクリックしてください。  
-**ZoomDrawPositionEffect_vXX**という名前のフォルダを削除することでアンインストールできます。
+**ZoomDrawPositionEffect**という名前のフォルダを削除することでアンインストールできます。
