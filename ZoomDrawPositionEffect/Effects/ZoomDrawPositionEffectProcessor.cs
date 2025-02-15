@@ -1,22 +1,26 @@
-﻿using Vortice.Direct2D1;
+﻿using System.Numerics;
+using Vortice.Direct2D1;
+using Vortice.Direct2D1.Effects;
+using YukkuriMovieMaker.Commons;
 using YukkuriMovieMaker.Player.Video;
+using YukkuriMovieMaker.Player.Video.Effects;
 
 namespace ZoomDrawPositionEffect.Effects
 {
-    internal class ZoomDrawPositionEffectProcessor : IVideoEffectProcessor
+    internal class ZoomDrawPositionEffectProcessor(IGraphicsDevicesAndContext devices, ZoomDrawPositionEffect item) : VideoEffectProcessorBase(devices)
     {
-        readonly ZoomDrawPositionEffect item;
-        ID2D1Image? input;
+        bool isFirst = true;
+        double rotation;
+        AffineTransform2DInterpolationMode interpolationMode;
+        
+        AffineTransform2D? transform2D;
 
-        public ID2D1Image Output => input ?? throw new NullReferenceException(nameof(input) + "is null");
-
-        public ZoomDrawPositionEffectProcessor(ZoomDrawPositionEffect item)
+        public override DrawDescription Update(EffectDescription effectDescription)
         {
-            this.item = item;
-        }
+            var drawDesc = effectDescription.DrawDescription;
+            if (transform2D is null)
+                return drawDesc;
 
-        public DrawDescription Update(EffectDescription effectDescription)
-        {
             var frame = effectDescription.ItemPosition.Frame;
             var length = effectDescription.ItemDuration.Frame;
             var fps = effectDescription.FPS;
@@ -28,24 +32,15 @@ namespace ZoomDrawPositionEffect.Effects
             var centerY = item.CenterY.GetValue(frame, length, fps);
             var rotationRatio = item.RotationRatio.GetValue(frame, length, fps) / 100;
             var direction = item.Direction;
+            var interpolationMode = drawDesc.ZoomInterpolationMode.ToTransform2D();
 
-            var drawDesc = effectDescription.DrawDescription;
+            //拡大率が0だと自然な回転を行えない
+            zoomX = zoomX == 0 ? 0.0000000001 : zoomX;
+            zoomY = zoomY == 0 ? 0.0000000001 : zoomY;
 
             double xLength = zoomX * (drawDesc.Draw.X - centerX);
             double yLength = zoomY * (drawDesc.Draw.Y - centerY);
-
-            if ((xLength == 0 && yLength == 0) || rotationRatio == 0)
-            {
-                return
-                drawDesc with
-                {
-                    Draw = new(
-                    (float)(centerX + xLength),
-                    (float)(centerY + yLength),
-                    drawDesc.Draw.Z)
-                };
-            }
-
+           
             var theta = Math.Atan2(yLength, xLength) * 180 / Math.PI;
             double rotation = 0;
 
@@ -61,7 +56,31 @@ namespace ZoomDrawPositionEffect.Effects
                     rotation = (yLength >= 0) ? theta - 90 : theta + 90;
                     break;
             }
-            rotation *= rotationRatio;
+            rotation *= rotationRatio * Math.PI / 180d;
+
+            if (isFirst || this.rotation != rotation)
+            {
+                transform2D.TransformMatrix = Matrix3x2.CreateRotation((float)rotation);
+                this.rotation = rotation;
+            }
+            if (isFirst || this.interpolationMode != interpolationMode)
+            {
+                transform2D.InterPolationMode = interpolationMode;
+                this.interpolationMode = interpolationMode;
+            }               
+
+            var control =
+                new VideoEffectController(
+                    item,
+                    [
+                        new ControllerPoint(
+                            new((float)-xLength, (float)-yLength, 0f),
+                            x=>
+                            {
+                                item.CenterX.AddToEachValues(x.Delta.X);
+                                item.CenterY.AddToEachValues(x.Delta.Y);
+                            })
+                        ]);
 
             return
                 drawDesc with
@@ -70,25 +89,31 @@ namespace ZoomDrawPositionEffect.Effects
                     (float)(centerX + xLength),
                     (float)(centerY + yLength),
                     drawDesc.Draw.Z),
-                    Rotation = new(
-                    0,
-                    0,
-                    drawDesc.Rotation.Z + (float)rotation)
+                    Controllers =
+                    [
+                        ..effectDescription.DrawDescription.Controllers,
+                        control
+                        ]
                 };
         }
-        public void ClearInput()
+        
+        protected override void setInput(ID2D1Image? input)
         {
-            input = null;
+            transform2D?.SetInput(0, input, true);
         }
-        public void SetInput(ID2D1Image? input)
+        
+        protected override ID2D1Image? CreateEffect(IGraphicsDevicesAndContext devices)
         {
-            this.input = input;
+            transform2D = new AffineTransform2D(devices.DeviceContext);
+            disposer.Collect(transform2D);
+            var output = transform2D.Output;
+            disposer.Collect(output);
+            return output;
         }
 
-        public void Dispose()
+        protected override void ClearEffectChain()
         {
-
+            transform2D?.SetInput(0, null, true);
         }
-
     }
 }
