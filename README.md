@@ -21,4 +21,4 @@
 3. `ZoomDrawPositionEffect`という名前のフォルダを削除する。
 
 ## ライセンス
-[MIT license](./LICENSE)
+[CC0 1.0 Universal](./LICENSE)
